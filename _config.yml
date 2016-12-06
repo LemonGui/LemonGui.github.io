@@ -64,14 +64,14 @@ duoshuo_share: true                     # set to false if you want to use Commen
 
 # Google Analytics
 ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
-ga_domain: huangxuan.me
+ga_domain: lemongui.me
 
 
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: “学习，学习，<br>一切都是学习”
-sidebar-avatar: /img/avatar-lemon.png      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/avatar-lemon.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
