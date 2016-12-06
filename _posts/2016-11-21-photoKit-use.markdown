@@ -138,7 +138,7 @@ tags:
     }];
 }
 ```
-7.同时获取多张图片(高清)，全部为高清图resultHandler才执行，需要从iCloud下载时progressHandler提供每张进度（P.S:内部压缩图片方法[实现](http://www.jianshu.com/p/121dcfb613c0)）
+7.同时获取多张图片(高清)，全部为高清图resultHandler才执行，需要从iCloud下载时progressHandler提供每张进度（P.S:内部压缩图片方法[实现](https://lemongui.github.io/2016/11/18/image-upload/)）
 
 ```
 -(void)getImagesForAssets:(NSArray<PHAsset *> *)assets progressHandler:(void(^)(double progress, NSError * error, BOOL *stop, NSDictionary * info))progressHandler resultHandler:(void (^)(NSArray<NSDictionary *> *))resultHandler{
