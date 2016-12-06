@@ -1,0 +1,96 @@
+---
+layout:     post
+title:      "SDWebImage支持URL不变时更新图片内容"
+subtitle:   "SDWebImage使用笔记"
+date:       2016-06-03
+author:     "Lemon"
+header-img: "img/home-bg0.jpg"
+tags:
+    - iOS开发
+    - 图片URL
+---
+
+关于`SDWebImage`支持URL不变时更新图片内容的问题，博客[这里](http://blog.handy.wang/blog/2016/01/29/sdwebimagehuan-cun-zhi-tu-pian-urlbu-bian/ )有了很好的解释，可供参考。
+
+结论就是当图片url不变，内容更新了后，想要客户端更新图片缓存需要做两步：
+1. 加载图片的地方设置`Option`是`SDWebImageRefreshCached`；
+2. 在诸如`AppDelegate didFinishLaunching`的地方追加如下代码
+```
+SDWebImageDownloader *imgDownloader = SDWebImageManager.sharedManager.imageDownloader;
+imgDownloader.headersFilter  = ^NSDictionary *(NSURL *url, NSDictionary *headers) {
+NSFileManager *fm = [[NSFileManager alloc] init];
+        NSString *imgKey = [SDWebImageManager.sharedManager cacheKeyForURL:url];
+        NSString *imgPath = [SDWebImageManager.sharedManager.imageCache defaultCachePathForKey:imgKey];
+        NSDictionary *fileAttr = [fm attributesOfItemAtPath:imgPath error:nil];
+        
+        NSMutableDictionary *mutableHeaders = [headers mutableCopy];
+        
+        NSDate *lastModifiedDate = nil;
+        
+        if (fileAttr.count > 0) {
+            if (fileAttr.count > 0) {
+                lastModifiedDate = (NSDate *)fileAttr[NSFileModificationDate];
+            }
+            
+        }
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        formatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+        formatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+        formatter.dateFormat = @"EEE, dd MMM yyyy HH:mm:ss z";
+        
+        NSString *lastModifiedStr = [formatter stringFromDate:lastModifiedDate];
+        lastModifiedStr = lastModifiedStr.length > 0 ? lastModifiedStr : @"";
+        [mutableHeaders setValue:lastModifiedStr forKey:@"If-Modified-Since"];
+        
+        return mutableHeaders;
+}
+```
+这段代码是以本地url对应的缓存图片更新时间转换成`If-Modified-Since`的value值传给服务器，服务器拿到该值后与服务端的`Last-Modified`值做对比，而本地转换的总是和服务端不相等，导致同一张图片实际上是不断从服务器下载更新了，验证方法：
+（1）在沙盒中查看同一张图片的更新时间，是一直变化的 
+（2）在block中打断点，查看`SDImageCacheType` 值
+```
+[self.imageView sd_setImageWithURL:url placeholderImage:defaultImage options:SDWebImageRefreshCached completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {} 
+```
+下载图片时查看`SDImageCacheType` 值，会发现一张图片会断两次，第一从缓存读取，第二次为`cacheType` 值为 `SDImageCacheTypeNone`，重新下载了一次更新本地图片，也就是会一直从服务器下载图片更新本地，显然不合逻辑。
+     更好的做法还是严格的将`Last-Modified` 或`ETag`值缓存起来，url为key,下载图片时将`Last-Modified`或`ETag`回传给服务器，两个一起传更好。通过查看`SDWebImage`源码发现，每次下载图片收到服务器响应时，会发送`SDWebImageDownloadReceiveResponseNotification`通知，将`SDWebImageDownloaderOperation` 作为参数传出，而`SDWebImageDownloaderOperation`有response和request，那么就好办了，我们取出response中的`Last-Modified`和`Etag`作为value值，同时取出request的`RUR.absoluteString`作为key,缓存起来，请求图片时将url对应的`Last-Modified`、`ETag`取出在`SDWebImageDownloader`的`headersFilter`设置一下传给服务器，有服务器来进行对比。有关服务器的对比逻辑请查看以上参考链接。具体代码如下：
+
+```
+#pragma mark -  配置sdwebImage headersFilter
+-(void)sdWebImageConfig{
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sdWebImageDownloadReceiveResponseNotification:) name:SDWebImageDownloadReceiveResponseNotification object:nil];
+    
+    SDWebImageDownloader *imgDownloader = SDWebImageManager.sharedManager.imageDownloader;
+    imgDownloader.headersFilter  = ^NSDictionary *(NSURL *url, NSDictionary *headers) {
+       
+        NSMutableDictionary *mutableHeaders = [headers mutableCopy];
+        
+        NSString * lastModifiedStr = [[SBAppCoreInfo getCacheDB] getStrValue:EMGlobal_LastModified_Cache  dataKey:url.absoluteString];
+        NSString * etagStr = [[SBAppCoreInfo getCacheDB] getStrValue:EMGlobal_ETag_Cache   dataKey:url.absoluteString];
+        
+        [mutableHeaders setValue:lastModifiedStr forKey:@"If-Modified-Since"];
+        [mutableHeaders setValue:etagStr forKey:@"If-None-Match"];
+
+        return mutableHeaders;
+    };
+}
+
+-(void)sdWebImageDownloadReceiveResponseNotification:(NSNotification *)note{
+    SDWebImageDownloaderOperation *  downloaderOperation = (SDWebImageDownloaderOperation *)note.object;
+    NSString * urlKey = downloaderOperation.request.URL.absoluteString;
+     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)downloaderOperation.response;
+    //缓存Last-Modified、ETag值
+    [[SBAppCoreInfo getCacheDB] setStrValue:EMGlobal_LastModified_Cache dataKey:urlKey dataValue:httpResponse.allHeaderFields[@"Last-Modified"]];
+    [[SBAppCoreInfo getCacheDB] setStrValue:EMGlobal_ETag_Cache dataKey:urlKey dataValue:httpResponse.allHeaderFields[@"ETag"]];
+}
+```
+
+
+其中 `EMGlobal_LastModified_Cache`、`EMGlobal_ETag_Cache`是定义的宏
+```
+[[SBAppCoreInfo getCacheDB] setStrValue:EMGlobal_LastModified_Cache dataKey:urlKey dataValue:httpResponse.allHeaderFields[@"Last-Modified"]];
+[[SBAppCoreInfo getCacheDB] getStrValue:EMGlobal_LastModified_Cache  dataKey:url.absoluteString];
+```
+这两个方法为自己封装的缓存类，我们也可以用plist缓存这两个值。这样沙盒中的图片不会一直更新，只有同一个url图片发生改变，即服务端图片的`Last-Modified`、`ETag`发生改变，才会更新客户端该图片的缓存
+如何查看图片url的`Last-Modified`、`ETag`值？在终端 输入
+> curl 图片url --head 
