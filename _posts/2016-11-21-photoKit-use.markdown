@@ -26,6 +26,7 @@ tags:
 #####二、PhotoKit的基本使用：
 ######为便于使用，封装一个单例类PhotoCatcherManager，实现以下方法：
 1.获取全部相册：
+
 ```
 -(NSMutableArray<PHAssetCollection*> *)getPhotoListDatas{
     NSMutableArray *dataArray = [NSMutableArray array];
@@ -43,6 +44,7 @@ tags:
 }
 ```
 2.获取一个相册的结果集(按时间排序)
+
 ```
 //获取某个相册的结果集
 -(PHFetchResult<PHAsset *> *)getFetchResult:(PHAssetCollection *)assetCollection ascend:(BOOL)ascend{
@@ -57,6 +59,7 @@ tags:
 }
 ```
 3.获取某个类型的结果集(按时间排序)
+
 ```
 + (PHFetchResult<PHAsset *> *)getFetchResultWithMediaType:(PHAssetMediaType)mediaType ascend:(BOOL)ascend{
     PHFetchOptions *options = [[PHFetchOptions alloc] init];
@@ -67,7 +70,9 @@ tags:
      return  [PHAsset fetchAssetsWithMediaType:mediaType options:options];
 }
 ```
+---
 4.获取系统相册CameraRoll 的结果集(按时间排序)
+
 ```
 -(PHFetchResult<PHAsset *> *)getCameraRollFetchResulWithAscend:(BOOL)ascend{
     //获取系统相册CameraRoll 的结果集
@@ -82,6 +87,7 @@ tags:
 }
 ```
 5.获取单张高清图,progressHandler为从iCloud下载进度
+
 ```
 -(void)getImageHighQualityForAsset:(PHAsset *)asset progressHandler:(void(^)(double progress, NSError * error, BOOL *stop, NSDictionary * info))progressHandler resultHandler:(void (^)(UIImage* result, NSDictionary * info))resultHandler{
    
@@ -110,6 +116,7 @@ tags:
 }
 ```
 私有方法，根据屏幕获取图片的大小
+
 ```
 -(CGSize)imageSizeForAsset:(PHAsset *)asset{
     CGFloat photoWidth = [UIScreen mainScreen].bounds.size.width;
@@ -121,6 +128,7 @@ tags:
 }
 ```
 6.获取单张缩略图
+
 ```
 -(void)getImageLowQualityForAsset:(PHAsset *)asset targetSize:(CGSize)targetSize resultHandler:(void (^)(UIImage* result, NSDictionary * info))resultHandler{
     [[PHCachingImageManager defaultManager] requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFill options:nil resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
@@ -131,6 +139,7 @@ tags:
 }
 ```
 7.同时获取多张图片(高清)，全部为高清图resultHandler才执行，需要从iCloud下载时progressHandler提供每张进度（P.S:内部压缩图片方法[实现](http://www.jianshu.com/p/121dcfb613c0)）
+
 ```
 -(void)getImagesForAssets:(NSArray<PHAsset *> *)assets progressHandler:(void(^)(double progress, NSError * error, BOOL *stop, NSDictionary * info))progressHandler resultHandler:(void (^)(NSArray<NSDictionary *> *))resultHandler{
     NSMutableArray * callBackPhotos = [NSMutableArray array];
@@ -177,6 +186,7 @@ tags:
 
 ```
 8.获取相册授权状态
+
 ```
 +(void)requestAuthorizationHandler:(void(^)(BOOL isAuthorized))handler {
     
@@ -197,13 +207,16 @@ tags:
 #####三、创建相片选择器：
 ######1.先看效果图（注意同时拉取多张大图时内存处理）
 ![效果图](http://upload-images.jianshu.io/upload_images/2203501-9bf33e275349c25b.gif?imageMogr2/auto-orient/strip)
+---
 主要包含以下几点：
+
 * ViewControllerA含有一个UITextView，我们从相册选取一张或多张图片让其展示。
 * ViewControllerB是相片选择界面，有UICollectionView构成，展示的是相册图片缩略图。
 * ViewControllerB界面点击图片可查看该图片高清图。
 
 ######2.实现
 2.1. ViewControllerA.m
+
 ```
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -267,12 +280,15 @@ tags:
 }
 ```
 2.2. ViewControllerB.h  ( PhotoController )
+
 ```
 @interface PhotoController : UIViewController
 @property (nonatomic,copy) void(^(photoCallBackBlock))(NSArray *);
 @end
 ```
+
 2.3.ViewControllerB.m 部分代码( PhotoController )
+
 ```
 - (void)viewDidLoad {
     self.manager = [PhotoCatcherManager sharedInstance];
@@ -373,3 +389,4 @@ tags:
     }];
 }
 ```
+
