@@ -1,9 +1,9 @@
 # Site settings
-title: 下弦月丶
+title: Lemon
 SEOTitle: Lemon的博客 | Lemon Blog
 header-img: img/home-bg.jpg
 email: ahugsw@163.com
-description: “哈哈哈”
+description: “”
 keyword: ""
 url: "https://lemongui.github.io"              # your host, for absolute URL
 baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
@@ -12,11 +12,11 @@ baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
 
 # SNS settings
 RSS: false
-weibo_username:     huxpro
-zhihu_username:     huxpro
-github_username:    huxpro
+#weibo_username:     huxpro
+#zhihu_username:     huxpro
+github_username:    lemongui
 #twitter_username:  huxpro
-facebook_username:  huxpro
+#facebook_username:  huxpro
 
 
 
@@ -75,7 +75,7 @@ sidebar-avatar: /img/avatar-gui.jpg      # use absolute URL, seeing it's used in
 
 # Featured Tags
 featured-tags: true                     # whether or not using Feature-Tags
-featured-condition-size: 1              # A tag will be featured if the size of it is more than this condition value
+featured-condition-size: 0              # A tag will be featured if the size of it is more than this condition value
 
 
 
