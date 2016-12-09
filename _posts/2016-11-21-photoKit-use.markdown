@@ -13,6 +13,7 @@ tags:
 >随着iOS10的推出，Xcode 8 最低支持iOS 8.0，PhotoKit可以完全替代ALAssetsLibrary来管理相册资源。本文主要介绍PhotoKit的基本使用,做一个简易的相片选择器。
 
 #####一、基本概念：
+
 **PHAsseet**:代表照片库中的一个资源，跟 ALAsset 类似，通过 PHAsset 可以获取和保存资源;
 **PHFetchOptions**:获取资源时的参数，可以传nil，即使用系统默认值；
 **PHFetchResult**:表示一系列的资源集合，也可以是相册的集合；
@@ -24,6 +25,7 @@ tags:
 ![](http://upload-images.jianshu.io/upload_images/2203501-b6405dd63ab659d6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 #####二、PhotoKit的基本使用：
+
 ######为便于使用，封装一个单例类PhotoCatcherManager，实现以下方法：
 1.获取全部相册：
 
@@ -205,7 +207,9 @@ tags:
 ```
 
 #####三、创建相片选择器：
+
 ######1.先看效果图（注意同时拉取多张大图时内存处理）
+
 ![效果图](http://upload-images.jianshu.io/upload_images/2203501-9bf33e275349c25b.gif?imageMogr2/auto-orient/strip)
 ---
 主要包含以下几点：
