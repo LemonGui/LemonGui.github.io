@@ -15,6 +15,7 @@ tags:
 结论就是当图片url不变，内容更新了后，想要客户端更新图片缓存需要做两步：
 1. 加载图片的地方设置`Option`是`SDWebImageRefreshCached`；
 2. 在诸如`AppDelegate didFinishLaunching`的地方追加如下代码
+
 ```
 SDWebImageDownloader *imgDownloader = SDWebImageManager.sharedManager.imageDownloader;
 imgDownloader.headersFilter  = ^NSDictionary *(NSURL *url, NSDictionary *headers) {
@@ -45,9 +46,11 @@ NSFileManager *fm = [[NSFileManager alloc] init];
         return mutableHeaders;
 }
 ```
+
 这段代码是以本地url对应的缓存图片更新时间转换成`If-Modified-Since`的value值传给服务器，服务器拿到该值后与服务端的`Last-Modified`值做对比，而本地转换的总是和服务端不相等，导致同一张图片实际上是不断从服务器下载更新了，验证方法：
 （1）在沙盒中查看同一张图片的更新时间，是一直变化的 
 （2）在block中打断点，查看`SDImageCacheType` 值
+
 ```
 [self.imageView sd_setImageWithURL:url placeholderImage:defaultImage options:SDWebImageRefreshCached completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {} 
 ```
