@@ -10,7 +10,7 @@ tags:
     - 图片URL
 ---
 
-关于`SDWebImage`支持URL不变时更新图片内容的问题，博客[这里](http://blog.handy.wang/blog/2016/01/29/sdwebimagehuan-cun-zhi-tu-pian-urlbu-bian/ )有了很好的解释，可供参考。
+关于`SDWebImage`支持URL不变时更新图片内容的问题，博客[这里](http://blog.handy.wang/blog/2016/01/29/sdwebimagehuan-cun-zhi-tu-pian-urlbu-bian/)有了很好的解释，可供参考。
 
 结论就是当图片url不变，内容更新了后，想要客户端更新图片缓存需要做两步：
 1. 加载图片的地方设置`Option`是`SDWebImageRefreshCached`；
