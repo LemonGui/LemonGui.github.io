@@ -12,9 +12,18 @@ tags:
 
 >UIAlertController的Alert设置。
 
-1. UIAlertController弹窗设置：
+###1. UIAlertController弹窗设置：
 
 ```
+/** 色值 RGB **/
+#define RGB_A(r, g, b, a) [UIColor colorWithRed:(CGFloat)(r)/255.0f green:(CGFloat)(g)/255.0f blue:(CGFloat)(b)/255.0f alpha:(CGFloat)(a)]
+#define RGB(r, g, b) RGB_A(r, g, b, 1)
+#define RGB_HEX(__h__) RGB((__h__ >> 16) & 0xFF, (__h__ >> 8) & 0xFF, __h__ & 0xFF)
+```
+
+```
+ UIAlertController * alertController = [UIAlertController alertControllerWithTitle:@"屏蔽说明" message:@"" preferredStyle:UIAlertControllerStyleAlert];
+ 
  NSMutableAttributedString *alertControllerMessageStr = [[NSMutableAttributedString alloc] initWithString:@"1.不看他的帖子\n股吧中不再显示他的帖子\n2.禁止他与我互动\n他无法对我转发、评论、@、赞\n3.禁止他关注我\n解除关注关系并禁止他关注我"];
                     [alertControllerMessageStr addAttributes:@{NSForegroundColorAttributeName:[UIColor grayColor]} range:NSMakeRange(8,12)];
                     [alertControllerMessageStr addAttributes:@{NSForegroundColorAttributeName:[UIColor grayColor]} range:NSMakeRange(30, 15)];
@@ -47,5 +56,8 @@ tags:
     return nil;
 }
 ```
+
+###2.效果图：
+![](https://raw.githubusercontent.com/LemonGui/LemonGui.github.io/master/img/otherImage/alert_set.jpeg)
 
 
